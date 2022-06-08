@@ -8,6 +8,10 @@ const char* mqtt_server = "69.69.69.69";
 const char* mqttUser = "eapcfltj";
 const char* mqttPassword = "3EjMIy89qzVn";
 
+const char* location = "HTL";
+const int id = 0;
+const int lvl = 1;
+
 WiFiClient espClient;
 PubSubClient client(espClient);
 
@@ -20,22 +24,33 @@ void setup(){
 }
 
 
-
+boolean occupied = true;
 void loop(){
 	if (!client.connected()) {
     		reconnect();
   	}
 	client.loop();
+	if(Sensor somethin somethin){
+		occupied = !occupied;
+		if(occupied){
+			client.publish(location, getJSON(occupied));
+		}
+	}
 }
 
+string getJSON(boolean occ){
+	curTime = bla bla server;
+	string json = "{\"id\": + id + \"start:\" + occ?curTime:\"null\" + \"end:\" + !occ?curTime:\"null\" + \"loc:\" + location + \"lvl\" + lvl";
+	return json;
+} 
+
 void reconnect() {
- 
   while (!client.connected()) {
     Serial.print("Attempting MQTT connection...");
     
-    if (client.connect("ESP8266Client")) {
+    if (client.connect("ESPClient")) {
       Serial.println("connected");
-      client.subscribe("esp32/output");
+      client.subscribe(location);
     } else {
       Serial.print("failed, status: ");
       Serial.print(client.state());
@@ -54,7 +69,7 @@ void setup_wifi() {
 
   WiFi.begin(ssid, password);
 
-  while (WiFi.status() != WL_CONNECTED) {
+  while (WiFi.status() != WL_CONNECTED) {21
     delay(500);
     Serial.print(".");
   }
