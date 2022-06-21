@@ -1,7 +1,6 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request
 from flask_restful import Resource, Api
 import paho.mqtt.client as mqtt
-import time
 import threading
 
 app = Flask(__name__)
@@ -16,12 +15,6 @@ class GetAllEvents(Resource):
 class GetSomeEvents(Resource):
     def get(self, cnt):
         return events[0:cnt]
-#    def get(self, count):
-#        return jsonify(events[0:count])
-#
-#    def get(self, start, end):
-#        return jsonify(events[start:end])
-
 
 def on_message(client, userdata, message):
     try:
@@ -31,13 +24,11 @@ def on_message(client, userdata, message):
         print("malformed json received");
 
 def on_log(client, userdata, level, buf):
-    print('log: ',buf)
+    print('log: ', buf)
 
 if __name__ == '__main__':
     api.add_resource(GetAllEvents, '/events')
     api.add_resource(GetSomeEvents, '/events/<int:cnt>')
-#    api.add_resource(GetEvents, '/last/<int:to>')
-#    api.add_resource(GetEvents, '/range/<int:from>:<int:to>')
 
     client = mqtt.Client('hub')
     client.connect('127.0.0.1')
@@ -47,5 +38,4 @@ if __name__ == '__main__':
     client.on_log = on_log
 
     threading.Thread(target=lambda: app.run(debug=True, use_reloader=False)).start()
-    client.loop_forever() # loop starten in Endlosschleife (blockiert)
-    print('EXIT')
+    client.loop_forever()
