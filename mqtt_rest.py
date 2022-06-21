@@ -8,11 +8,14 @@ app = Flask(__name__)
 api = Api(app)
 
 events = []
-
-class GetEvents(Resource):
+ 
+class GetAllEvents(Resource):
     def get(self):
-        return jsonify(events)
+        return events
 
+class GetSomeEvents(Resource):
+    def get(self, cnt):
+        return events[0:cnt]
 #    def get(self, count):
 #        return jsonify(events[0:count])
 #
@@ -21,26 +24,28 @@ class GetEvents(Resource):
 
 
 def on_message(client, userdata, message):
-    events.insert(0, str(message.payload.decode("utf-8")))
-    print(events)
+    try:
+        events.insert(0, eval(str(message.payload.decode('utf-8'))))
+        print(events)
+    except:
+        print("malformed json received");
 
 def on_log(client, userdata, level, buf):
-    print("log: ",buf)
+    print('log: ',buf)
 
 if __name__ == '__main__':
-    api.add_resource(GetEvents, '/events')
+    api.add_resource(GetAllEvents, '/events')
+    api.add_resource(GetSomeEvents, '/events/<int:cnt>')
 #    api.add_resource(GetEvents, '/last/<int:to>')
 #    api.add_resource(GetEvents, '/range/<int:from>:<int:to>')
 
     client = mqtt.Client('hub')
     client.connect('127.0.0.1')
 
-    client.subscribe("HTL")
+    client.subscribe('HTL')
     client.on_message = on_message
     client.on_log = on_log
 
     threading.Thread(target=lambda: app.run(debug=True, use_reloader=False)).start()
     client.loop_forever() # loop starten in Endlosschleife (blockiert)
-    print("EXIT")
-
-
+    print('EXIT')
